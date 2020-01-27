@@ -1,6 +1,6 @@
 MOT16*
 detections/
-networks/
+models/
 .idea/
 
 # Byte-compiled / optimized / DLL files

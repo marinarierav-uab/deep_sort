@@ -89,9 +89,12 @@ class ImageEncoder(object):
 
     def __call__(self, data_x, batch_size=32):
         out = np.zeros((len(data_x), self.feature_dim), np.float32)
+
+        # CALL: def _run_in_batches(f, data_dict, out, batch_size)
         _run_in_batches(
             lambda x: self.session.run(self.output_var, feed_dict=x),
             {self.input_var: data_x}, out, batch_size)
+
         return out
 
 

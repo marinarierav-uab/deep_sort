@@ -163,6 +163,19 @@ def run(sequence_dir, detection_file, output_file, min_confidence,
     tracker = Tracker(metric)
     results = []
 
+    """
+    seq_info['detections'] --> array of shape (detections, 10 + feat vect size)
+    
+    Every row corresponds to a single detection (every frame can have various detections and therefore various rows)
+    
+    For each detection, store:
+        - The 10 first columns correspond to the MOT challenge notations:
+        
+            [<frame>, <id>, <bb_left>, <bb_top>, <bb_width>, <bb_height>, <conf>, <x>, <y>, <z>]
+            OBS. The <id>, <x>, <y>, <z> params are set to -1.
+        
+        - The rest of columns correspond to the feature vectors.
+    """
     print(seq_info['detections'])
     print("")
 
