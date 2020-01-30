@@ -6,6 +6,7 @@ import os
 
 import cv2
 import numpy as np
+import json
 
 from application_util import preprocessing
 from application_util import visualization
@@ -176,15 +177,24 @@ def run(sequence_dir, detection_file, output_file, min_confidence,
         
         - The rest of columns correspond to the feature vectors.
     """
-    print(seq_info['detections'])
-    print("")
+
+    det = seq_info["detections"]
+    images = sorted(seq_info['image_filenames'].keys())
 
     def frame_callback(vis, frame_idx):
+
+        image_id = images.index(frame_idx)
+        det = seq_info["detections"][image_id:]
+
+        if image_id==366:
+            print()
+
         print("Processing frame %05d" % frame_idx)
 
         # Load image and generate detections.
         detections = create_detections(
-            seq_info["detections"], frame_idx, min_detection_height)
+            seq_info["detections"], image_id, min_detection_height)
+
         detections = [d for d in detections if d.confidence >= min_confidence]
 
         # Run non-maxima suppression.
@@ -208,28 +218,49 @@ def run(sequence_dir, detection_file, output_file, min_confidence,
 
         # Store results.
         for track in tracker.tracks:
-            if not track.is_confirmed() or track.time_since_update > 1:
-                continue
+            #if not track.is_confirmed() or track.time_since_update > 1:
+            #    continue
             bbox = track.to_tlwh()
             results.append([
-                frame_idx, track.track_id, bbox[0], bbox[1], bbox[2], bbox[3]])
+                image_id, track.track_id, bbox[0], bbox[1], bbox[2], bbox[3], 1])
 
     # Run tracker.
     if display:
-        visualizer = visualization.Visualization(seq_info, update_ms=5000)
+        visualizer = visualization.Visualization(seq_info, update_ms=5)  # 5
     else:
         visualizer = visualization.NoVisualization(seq_info)
     visualizer.run(frame_callback)
 
     # Store results.
+
+    #def results2json(results, output_file):
+    data = list()
+    for i, row in enumerate(results):
+
+        print(i)
+        if i == 412:
+            print()
+
+        d = dict()
+        d['image_id'] = row[0]
+        d['bbox'] = [row[2], row[3], row[4], row[5]]
+        d['score'] = 1
+        d['category_id'] = 1
+        data.append(d)
+
+    with open(output_file, 'w') as outfile:
+        json.dump(data, outfile)
+
+    """
     f = open(output_file, 'w')
     for row in results:
         print('%d,%d,%.2f,%.2f,%.2f,%.2f,1,-1,-1,-1' % (
-            row[0], row[1], row[2], row[3], row[4], row[5]),file=f)
+            row[0], row[1], row[2], row[3], row[4], row[5]), file=f)
+    """
 
 
 def bool_string(input_string):
-    if input_string not in {"True","False"}:
+    if input_string not in {"True", "False"}:
         raise ValueError("Please Enter a valid Ture/False choice")
     else:
         return (input_string == "True")

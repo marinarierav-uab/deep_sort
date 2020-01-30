@@ -1,6 +1,9 @@
 MOT16*
 detections/
 models/
+json/
+results/
+data/
 .idea/
 
 # Byte-compiled / optimized / DLL files
